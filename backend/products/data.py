@@ -70,7 +70,7 @@ products = [
         'image': '/images/alexa.jpg',
         'description':
         'Meet Echo Dot - Our most popular smart speaker with a fabric design. It is our most compact smart speaker that fits perfectly into small space',
-        'brand': 'Amazon',
+        'brand': 'Amazonn',
         'category': 'Electronics',
         'price': 29.99,
         'countInStock': 0,
