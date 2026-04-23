@@ -1,0 +1,36 @@
+{% extends "base/base.html" %}
+
+{% block title %}Accueil | SimpliCulinary{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-panel">
+            <div>
+                <span class="hero-kicker">Cuisine, courses et choix rapides</span>
+                <h1>Bienvenue sur SimpliCulinary</h1>
+                <p class="hero-text">
+                    Retrouvez une vitrine claire de vos produits, un acces direct au panier
+                    et une navigation adaptee a votre projet e-commerce.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn btn-dark btn-lg" href="{% url 'product_list' %}">Voir les produits</a>
+                    <a class="btn btn-outline-dark btn-lg" href="{% url 'cart_detail' %}">Ouvrir le panier</a>
+                </div>
+            </div>
+            <div class="hero-card-grid">
+                <article class="hero-card">
+                    <i class="fa-solid fa-bowl-food"></i>
+                    <h2>Catalogue lisible</h2>
+                    <p>Une presentation plus propre de vos produits et de leur disponibilite.</p>
+                </article>
+                <article class="hero-card">
+                    <i class="fa-solid fa-truck-fast"></i>
+                    <h2>Parcours fluide</h2>
+                    <p>Accedez aux rubriques essentielles depuis une barre de navigation concise.</p>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

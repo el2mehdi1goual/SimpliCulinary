@@ -1,0 +1,54 @@
+{% extends "base/base.html" %}
+
+{% block title %}Panier | SimpliCulinary{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="section-heading">
+            <span class="hero-kicker">Panier</span>
+            <h1>Votre panier</h1>
+            <p>Retrouvez ici les articles ajoutes a votre selection.</p>
+        </div>
+
+        <div class="cart-shell">
+            <div class="cart-summary-card">
+                <div class="cart-summary-icon">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div>
+                    <h2>{{ total_items }} article{% if total_items > 1 %}s{% endif %}</h2>
+                    <p class="mb-0">Le panier est pret pour vos prochaines actions.</p>
+                </div>
+            </div>
+
+            {% if cart_items %}
+            <div class="table-responsive">
+                <table class="table cart-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Quantite</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-regular fa-face-smile"></i>
+                <p>Votre panier est vide pour le moment.</p>
+                <a class="btn btn-dark" href="{% url 'product_list' %}">Parcourir les produits</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

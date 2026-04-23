@@ -1,0 +1,46 @@
+{% extends "base/base.html" %}
+
+{% block title %}Nos produits | SimpliCulinary{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="section-heading">
+            <span class="hero-kicker">Catalogue</span>
+            <h1>Nos produits</h1>
+            <p>Consultez les references disponibles avec leur marque, categorie et niveau de stock.</p>
+        </div>
+
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-md-6 col-xl-4">
+                <article class="product-card h-100">
+                    <div class="product-card-top">
+                        <span class="product-category">{{ product.category }}</span>
+                        <span class="stock-badge {% if product.countInStock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
+                            {% if product.countInStock > 0 %}En stock{% else %}Rupture{% endif %}
+                        </span>
+                    </div>
+                    <h2>{{ product.name }}</h2>
+                    <p class="product-description">{{ product.description|truncatechars:120 }}</p>
+                    <dl class="product-meta">
+                        <div>
+                            <dt>Marque</dt>
+                            <dd>{{ product.brand }}</dd>
+                        </div>
+                        <div>
+                            <dt>Prix</dt>
+                            <dd>${{ product.price }}</dd>
+                        </div>
+                        <div>
+                            <dt>Stock</dt>
+                            <dd>{{ product.countInStock }}</dd>
+                        </div>
+                    </dl>
+                </article>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
