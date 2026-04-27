@@ -1,28 +1,54 @@
 from django.core.management.base import BaseCommand
-from faker import Faker
-from products.models import Category,Product
+from products.models import Category, Product
 import random
 
 class Command(BaseCommand):
-    help='Génère les données fictives pour les produits'
+    help = 'Génère les données fictives pour les produits'
     
     def handle(self, *args, **options):
-        faker=Faker('fr_FR')
+        # Données statiques
+        category_names = ['Pizza', 'Pasta', 'Desserts', 'Boissons', 'Salades']
+        product_names = [
+            'Margherita', 'Carbonara', 'Tiramisu', 'Coca Cola', 'Salade César',
+            'Quattro Formaggi', 'Bolognese', 'Panna Cotta', 'Fanta Orange', 'Salade Tomate'
+        ]
+        descriptions = [
+            'Un délicieux plat savoureux',
+            'Parfait pour le repas du jour',
+            'Une spécialité maison authentique',
+            'Préparé avec les meilleurs ingrédients',
+            'Un incontournable de notre menu'
+        ]
         
-        categories=[]
+        categories = []
         
-        for _ in range(5):
-            name=faker.word().capitalize()
-            slug=faker.slug(name)
-            categorie=Category.objects.create(name=name,slug=slug)
-            categories.append(categorie)
-            self.stdout.write(f'Catégorie créée avec succès:{name}')
-            
-        for i in range(8):
-            Product.objects.create(name=faker.sentence(nb_words=4).replace('.',''),
-                                   description=faker.text(max_nb_chars=450),
-                                   price=faker.random_number(digits=4),
-                                   stock=faker.random_int(0,100),
-                                   category=random.choice(categories)
-                                   )
-            self.stdout.write(f'Produit {i+1} créé avec succès')
+        # Créer les catégories
+        for name in category_names:
+            slug = name.lower().replace(' ', '-')
+            categorie, created = Category.objects.get_or_create(
+                name=name,
+                defaults={'slug': slug}
+            )
+            if created:
+                categories.append(categorie)
+                self.stdout.write(f'✓ Catégorie créée: {name}')
+            else:
+                categories.append(categorie)
+        
+        # Créer les produits
+        for i, product_name in enumerate(product_names):
+            product, created = Product.objects.get_or_create(
+                name=product_name,
+                defaults={
+                    'description': descriptions[i % len(descriptions)],
+                    'price': random.randint(5, 30),
+                    'stock': random.randint(10, 100),
+                    'category': random.choice(categories)
+                }
+            )
+            if created:
+                self.stdout.write(f'✓ Produit {i+1} créé: {product_name}')
+            else:
+                self.stdout.write(f'~ Produit déjà existant: {product_name}')
+        
+        self.stdout.write(self.style.SUCCESS('✓ Données chargées avec succès!'))
