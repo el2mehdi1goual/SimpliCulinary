@@ -32,7 +32,7 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}" href="{% url 'product_list' %}">Nos produits</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'products_list' %}active{% endif %}" href="{% url 'products_list' %}">Nos produits</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">
