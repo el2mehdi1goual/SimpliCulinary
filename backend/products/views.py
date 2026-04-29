@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.views import View
 from .models import Product
-# Create your views here.
-class ProductListView(View):
-    def get(self, request):
-        products = Product.objects.all()
-        return render(request, 'products/product_list.html', {'products': products})
+from django.views.generic import ListView
+
+
+class ProductsListView(ListView):
+    model = Product
+    template_name = 'products/product_list.html'
+    context_object_name = 'produits'
