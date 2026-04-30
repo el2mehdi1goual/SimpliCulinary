@@ -1,0 +1,87 @@
+{% extends "base/base.html" %}
+
+{% block title %}Panier | SimpliCulinary{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="py-3">Votre Panier {% if user.is_authenticated %}{{ user.username }}{% endif %}</h1>
+
+            {% if not cart.items.all %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    Votre Panier est vide
+                    <a href="{% url 'home' %}" class="alert-link">Retour</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                </div>
+            {% else %}
+                <div class="list-group list-group-flush">
+                    {% for item in cart.items.all %}
+                        <div class="list-group-item">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded">
+                                    {% else %}
+                                        <div class="bg-body-secondary rounded text-muted small p-2 text-center">Sans image</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-3">
+                                    <a href="{% url 'product_detail' item.product.id %}" class="text-decoration-none">
+                                        {{ item.product.name }}
+                                    </a>
+                                </div>
+
+                                <div class="col-md-2">
+                                    {{ item.product.price }}
+                                </div>
+
+                                <div class="col-md-3">
+                                    <form method="post" action="{% url 'cartItem_update' item.id %}">
+                                        {% csrf_token %}
+                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control mb-2">
+
+                                        {% if item.quantity > item.product.stock %}
+                                            <button type="submit" class="btn btn-sm btn-outline-primary" disabled>
+                                                Quantité en stock insuffisante
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                Mettre à jour
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <a href="{% url 'cartItem_delete' item.pk %}" class="btn btn-light">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item">
+                        <h3>Sous-total</h3>
+                        {{ cart.total }} MAD
+                    </div>
+
+                    <div class="list-group-item text-center">
+                        <a href="{% url 'order_create' %}" class="btn btn-primary">
+                            Procéder au paiement
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

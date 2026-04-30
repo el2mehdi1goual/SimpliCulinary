@@ -1,73 +1,122 @@
 from urllib.parse import quote
 
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import DeleteView, DetailView
 
 from products.models import Product
 
 from .models import Cart, CartItem
 
 
-class AddToCartView(View):
-    """POST : ajoute une ligne au panier (utilisateur connecté uniquement)."""
+def _cart_matches_request(request, cart):
+    if request.user.is_authenticated:
+        return cart.user_id == request.user.id
+    key = request.session.session_key
+    return bool(key and cart.session_key == key)
 
+
+class AddToCartView(View):
     def post(self, request, product_id):
-        product = get_object_or_404(Product, pk=product_id)
+        product = get_object_or_404(Product, id=product_id)
+
+        try:
+            quantity = int(request.POST.get("quantity"))
+            if quantity < 1:
+                quantity = 1
+        except (TypeError, ValueError):
+            quantity = 1
 
         def redirect_detail(message):
             url = f"{reverse('product_detail', kwargs={'pk': product.pk})}?error={quote(message)}"
             return redirect(url)
 
-        if not request.user.is_authenticated:
-            return redirect_detail("Connectez-vous pour ajouter un article au panier.")
-
-        try:
-            qty = int(request.POST.get("quantity") or "1")
-        except ValueError:
-            qty = 1
-        qty = max(1, qty)
-
         if product.stock < 1:
             return redirect_detail("Ce produit est en rupture de stock.")
-        if qty > product.stock:
-            return redirect_detail("Quantité supérieure au stock disponible.")
 
-        cart, _ = Cart.objects.get_or_create(user=request.user)
-        item, created = CartItem.objects.get_or_create(
-            cart=cart,
-            product=product,
-            defaults={"quantity": qty},
-        )
-        if not created:
-            new_qty = item.quantity + qty
-            if new_qty > product.stock:
-                return redirect_detail(
-                    "Quantité totale dans le panier supérieure au stock disponible."
-                )
-            item.quantity = new_qty
-            item.save()
+        if request.user.is_authenticated:
+            cart, _ = Cart.objects.get_or_create(user=request.user)
+        else:
+            if not request.session.session_key:
+                request.session.create()
+            cart, _ = Cart.objects.get_or_create(
+                session_key=request.session.session_key
+            )
 
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+
+        if created:
+            new_qty = quantity
+        else:
+            new_qty = cart_item.quantity + quantity
+
+        if new_qty > product.stock:
+            return redirect_detail(
+                "Quantité supérieure au stock disponible pour ce produit."
+            )
+
+        if created:
+            cart_item.quantity = quantity
+        else:
+            cart_item.quantity = new_qty
+
+        cart_item.save()
         return redirect("cart_detail")
 
 
-class CartDetailView(TemplateView):
-	template_name = 'cart/cart_detail.html'
+class CartDetailView(DetailView):
+    model = Cart
+    template_name = "cart/detail_cart.html"
+    context_object_name = "cart"
 
-	def get_context_data(self, **kwargs):
-		context = super().get_context_data(**kwargs)
-		cart_items = []
-		total_items = 0
+    def get_object(self):
+        if self.request.user.is_authenticated:
+            cart, _ = Cart.objects.get_or_create(user=self.request.user)
+        else:
+            if not self.request.session.session_key:
+                self.request.session.create()
 
-		if self.request.user.is_authenticated:
-			cart = getattr(self.request.user, 'cart', None)
-			if cart is not None:
-				cart_items = cart.items.select_related('product')
-				total_items = sum(item.quantity for item in cart_items)
+            session_key = self.request.session.session_key
+            cart, _ = Cart.objects.get_or_create(session_key=session_key)
 
-		context.update({
-			'cart_items': cart_items,
-			'total_items': total_items,
-		})
-		return context
+        return Cart.objects.prefetch_related("items__product").get(pk=cart.pk)
+
+
+class CartItemUpdateView(View):
+    def post(self, request, pk):
+        item = get_object_or_404(CartItem, pk=pk)
+        if not _cart_matches_request(request, item.cart):
+            raise Http404()
+        try:
+            qty = int(request.POST.get("quantity"))
+            if qty < 1:
+                qty = 1
+        except (TypeError, ValueError):
+            qty = 1
+        if qty > item.product.stock:
+            qty = item.product.stock
+        item.quantity = qty
+        item.save()
+        return redirect("cart_detail")
+
+
+class CartItemDeleteView(DeleteView):
+    model = CartItem
+    template_name = "cart/cartitem_delete.html"
+    success_url = reverse_lazy("cart_detail")
+    context_object_name = "cartitem"
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            cart = get_object_or_404(Cart, user=self.request.user)
+        else:
+            session_key = self.request.session.session_key
+
+            if not session_key:
+                return CartItem.objects.none()
+
+            cart = get_object_or_404(Cart, session_key=session_key)
+
+        return CartItem.objects.filter(cart=cart)
