@@ -1,2 +1,4 @@
 # Django 6.x is required for Python 3.14+ (Django 4.2 breaks admin/templates with 3.14).
 Django==6.0.3
+django-crispy-forms>=2.6
+crispy-bootstrap5>=2025.0
