@@ -38,19 +38,11 @@
                                 </div>
 
                                 <div class="col-md-3">
-                                    <form method="post" action="{% url 'cartItem_update' item.id %}">
+                                    <form action="{% url 'cartItem_update' item.id %}" method="post">
                                         {% csrf_token %}
-                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control mb-2">
+                                        <input type="number" min="1" name="quantity" class="form-control mb-2" value="{{ item.quantity }}">
 
-                                        {% if item.quantity > item.product.stock %}
-                                            <button type="submit" class="btn btn-sm btn-outline-primary" disabled>
-                                                Quantité en stock insuffisante
-                                            </button>
-                                        {% else %}
-                                            <button type="submit" class="btn btn-sm btn-outline-primary">
-                                                Mettre à jour
-                                            </button>
-                                        {% endif %}
+                                        <button type="submit" class="btn btn-outline-dark">mettre à jour</button>
                                     </form>
                                 </div>
 

@@ -1,5 +1,6 @@
 from urllib.parse import quote
 
+from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -85,20 +86,24 @@ class CartDetailView(DetailView):
 
 
 class CartItemUpdateView(View):
-    def post(self, request, pk):
-        item = get_object_or_404(CartItem, pk=pk)
-        if not _cart_matches_request(request, item.cart):
+    def post(self, request, item_id):
+        cart_item = get_object_or_404(CartItem, id=item_id)
+        if not _cart_matches_request(request, cart_item.cart):
             raise Http404()
         try:
-            qty = int(request.POST.get("quantity"))
-            if qty < 1:
-                qty = 1
+            quantity = int(request.POST.get("quantity"))
         except (TypeError, ValueError):
-            qty = 1
-        if qty > item.product.stock:
-            qty = item.product.stock
-        item.quantity = qty
-        item.save()
+            messages.error(request, "Quantité invalide.")
+            return redirect("cart_detail")
+        if quantity < 1:
+            quantity = 1
+        if quantity > cart_item.product.stock:
+            messages.error(request, "la quantité est excédentaire")
+            return redirect("cart_detail")
+
+        cart_item.quantity = quantity
+        cart_item.save()
+
         return redirect("cart_detail")
 
 
