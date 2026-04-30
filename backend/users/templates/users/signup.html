@@ -1,0 +1,16 @@
+{% extends "base/base.html" %}
+
+{% block title %}Inscription | SimpliCulinary{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>Inscription</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-primary">S'inscrire</button>
+    </form>
+</div>
+{% endblock %}
