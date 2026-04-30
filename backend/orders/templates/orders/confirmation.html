@@ -1,0 +1,58 @@
+{% extends "base/base.html" %}
+
+{% block title %}Commande confirmée | SimpliCulinary{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="h3 mb-3">Commande confirmée</h1>
+    <p class="text-success">Merci ! Votre commande a bien été enregistrée.</p>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">N° commande</dt>
+                <dd class="col-sm-9">{{ order.pk }}</dd>
+
+                <dt class="col-sm-3">Date</dt>
+                <dd class="col-sm-9">{{ order.created_at }}</dd>
+
+                <dt class="col-sm-3">Statut</dt>
+                <dd class="col-sm-9">{{ order.status }}</dd>
+
+                <dt class="col-sm-3">Total</dt>
+                <dd class="col-sm-9"><strong>{{ order.total }} MAD</strong></dd>
+
+                <dt class="col-sm-3">Livraison</dt>
+                <dd class="col-sm-9">{{ order.shipping_address|linebreaksbr }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    <h2 class="h5">Articles</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Produit</th>
+                    <th>Prix unitaire</th>
+                    <th>Quantité</th>
+                    <th>Sous-total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in order.items.all %}
+                <tr>
+                    <td>{% if line.product %}{{ line.product.name }}{% else %}Produit supprimé{% endif %}</td>
+                    <td>{{ line.price }} MAD</td>
+                    <td>{{ line.quantity }}</td>
+                    <td>{{ line.line_total }} MAD</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a href="{% url 'home' %}" class="btn btn-primary">Retour à l’accueil</a>
+    <a href="{% url 'products_list' %}" class="btn btn-outline-secondary">Continuer les achats</a>
+</div>
+{% endblock %}

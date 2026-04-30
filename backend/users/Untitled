@@ -1,0 +1,4 @@
+IV. Gestion du processus de commande
+Travail à faire :
+1) Créer dans l’application « orders » un fichier forms.py pour générer un
+formulaire depuis le modèle Order 
